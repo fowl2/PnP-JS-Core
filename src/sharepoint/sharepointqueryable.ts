@@ -241,20 +241,10 @@ export class SharePointQueryable extends ODataQueryable {
 }
 
 /**
- * Represents a REST collection which can be filtered, paged, and selected
+ * Represents an instance that can be selected
  *
  */
-export class SharePointQueryableCollection extends SharePointQueryable {
-
-    /**
-     * Filters the returned collection (https://msdn.microsoft.com/en-us/library/office/fp142385.aspx#bk_supported)
-     *
-     * @param filter The string representing the filter query
-     */
-    public filter(filter: string): this {
-        this._query.add("$filter", filter);
-        return this;
-    }
+export class SharePointQueryableInstance extends SharePointQueryable {
 
     /**
      * Choose which fields to return
@@ -268,6 +258,11 @@ export class SharePointQueryableCollection extends SharePointQueryable {
         return this;
     }
 
+    protected clearSelect(): this {
+        this._query.remove("$select");
+        return this;
+    }
+
     /**
      * Expands fields such as lookups to get additional data
      *
@@ -277,6 +272,23 @@ export class SharePointQueryableCollection extends SharePointQueryable {
         if (expands.length > 0) {
             this._query.add("$expand", expands.join(","));
         }
+        return this;
+    }
+}
+
+/**
+ * Represents a REST collection which can be filtered, paged, and selected
+ *
+ */
+export class SharePointQueryableCollection extends SharePointQueryableInstance {
+
+    /**
+     * Filters the returned collection (https://msdn.microsoft.com/en-us/library/office/fp142385.aspx#bk_supported)
+     *
+     * @param filter The string representing the filter query
+     */
+    public filter(filter: string): this {
+        this._query.add("$filter", filter);
         return this;
     }
 
@@ -325,33 +337,3 @@ export class SharePointQueryableCollection extends SharePointQueryable {
 }
 
 
-/**
- * Represents an instance that can be selected
- *
- */
-export class SharePointQueryableInstance extends SharePointQueryable {
-
-    /**
-     * Choose which fields to return
-     *
-     * @param selects One or more fields to return
-     */
-    public select(...selects: string[]): this {
-        if (selects.length > 0) {
-            this._query.add("$select", selects.join(","));
-        }
-        return this;
-    }
-
-    /**
-     * Expands fields such as lookups to get additional data
-     *
-     * @param expands The Fields for which to expand the values
-     */
-    public expand(...expands: string[]): this {
-        if (expands.length > 0) {
-            this._query.add("$expand", expands.join(","));
-        }
-        return this;
-    }
-}
